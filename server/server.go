@@ -54,12 +54,10 @@ func NewServer(opts ...Option) *Server {
 	options := newOptions(opts...)
 
 	s := &Server{
-		Id:      generateID(options.ServiceName),
-		Options: options,
-		Name:    options.ServiceName,
-		//subscribers: make(map[*subscriber][]broker.Subscriber),
+		Id:       generateID(options.ServiceName),
+		Options:  options,
+		Name:     options.ServiceName,
 		handlers: make(map[string]Handler),
-		//Broker:      options.Broker,
 	}
 
 	s.createGrpcServer()
@@ -74,37 +72,6 @@ func (s *Server) Server() *grpc.Server {
 func (s *Server) GetPort() int {
 	return s.Port
 }
-
-//func (s *Server) createSubscriptionHandlers() error {
-//
-//	for sb := range s.subscribers {
-//
-//		handler := s.createSubHandler(sb, s.Options)
-//		var opts []broker.SubscribeOption
-//		if queue := sb.Options().Queue; len(queue) > 0 {
-//			opts = append(opts, broker.Queue(queue))
-//		}
-//
-//		if cx := sb.Options().Context; cx != nil {
-//			opts = append(opts, broker.SubscribeContext(cx))
-//		}
-//
-//		if !sb.Options().AutoAck {
-//			opts = append(opts, broker.DisableAutoAck())
-//		}
-//
-//		opts = append(opts, broker.SetSubscriberWorkers(sb.Options().Workers))
-//
-//		log.Infof("[grpc] Broker [%s] Subscribing to topic: %s", s.Broker.String(), sb.Topic())
-//		sub, err := s.Broker.Subscribe(sb.Topic(), handler, opts...)
-//		if err != nil {
-//			log.Errorf("Subscriber Error : %s", err)
-//			return err
-//		}
-//		s.subscribers[sb] = []broker.Subscriber{sub}
-//	}
-//	return nil
-//}
 
 func (s *Server) ServeGRPC(host string, port int) error {
 	//err := s.createSubscriptionHandlers()

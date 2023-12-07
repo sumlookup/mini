@@ -68,12 +68,6 @@ func WithDialOptions(n DialOptions) Option {
 	}
 }
 
-//func WithConnectionHealthCheck(h bool) Option {
-//	return func(o *Options) {
-//		o.ConnectionHealthCheck = h
-//	}
-//}
-
 func WithConnectionAttempts(h bool) Option {
 	return func(o *Options) {
 		o.ConnectionAttempts = h
@@ -106,40 +100,8 @@ func TLSConfig(t *tls.Config) Option {
 	}
 }
 
-// Specify broker
-//func Broker(b broker.Broker) Option {
-//	return func(o *Options) {
-//		o.Broker = b
-//	}
-//}
-
 func WithTransport(tr transport.Transport) Option {
 	return func(o *Options) {
 		o.Transport = tr
-	}
-}
-
-// UnaryInterceptor
-func UnaryInterceptor(r ...grpc.UnaryClientInterceptor) Option {
-	return func(o *Options) {
-		o.UnaryInts = append(o.UnaryInts, r...)
-	}
-}
-
-func StreamInterceptor(r ...grpc.StreamClientInterceptor) Option {
-	return func(o *Options) {
-		o.StreamInts = append(o.StreamInts, r...)
-	}
-}
-
-func WithMaxConnectionAttempts(i int) Option {
-	return func(o *Options) {
-		o.ConnectionMaxAttempts = i
-	}
-}
-
-func WithHostOverride(host string) Option {
-	return func(o *Options) {
-		o.HostOverride = host
 	}
 }

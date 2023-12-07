@@ -2,6 +2,9 @@ package service
 
 import (
 	"fmt"
+	"os"
+	"strconv"
+
 	//"honnef.co/go/tools/config"
 
 	//"github.com/sumlookup/mini/loglevel"
@@ -30,35 +33,11 @@ type Service struct {
 	Name   string
 	Srv    *server.Server
 	Closer *Closer
-	//Provider ServiceProvider
-	start bool
+	start  bool
 
 	transport string
 	registry  string
-	//selector  string
 }
-
-//const ServiceProviderPluginName = "CreateServiceProvider"
-
-// ServiceProviderPluginEntry is a definition of the function that returns the service provider interface
-//type ServiceProviderPluginEntry func(provider dependency.DependencyProvider) Service
-
-//func init() {
-//	loglevel.SetLogging()
-//}
-
-//type ServiceProvider interface {
-//	InitService() func(app *Service) error
-//	GetServiceClient(cl *client.Client) interface{}
-//	GetServiceProtoName() string
-//	GetServiceName() string
-//	//GetCli() ([]*cli.Command, error)
-//	//GetDependencyProvider() dependency.DependencyProvider
-//
-//	// GetProjectName returns the project name. ex: rosi, sirius. List of available project names in tplib.c9helpers
-//	// project name is required for conststency reasons when building topic names and many others
-//	GetProjectName() string
-//}
 
 type Closer struct {
 	closers []func()
@@ -90,9 +69,6 @@ func NewService(name, transport, registry string) *Service {
 
 	start = true
 
-	// override with the ones passed as argument
-	//s := newServiceOptions(sopt, sopts...)
-
 	// create the server
 	grpcSrv = server.NewServer(srvOpts...)
 	// register reflection
@@ -101,11 +77,9 @@ func NewService(name, transport, registry string) *Service {
 	reflection.Register(serv)
 
 	srv = &Service{
-		Name: name,
-		//ServiceOptions: sopt,
-		Srv:    grpcSrv,
-		Closer: closer,
-		//Config:         cfg,
+		Name:      name,
+		Srv:       grpcSrv,
+		Closer:    closer,
 		start:     start,
 		transport: transport,
 		registry:  registry,
@@ -147,16 +121,6 @@ func (s *Service) Close() {
 	s.Srv.Stop()
 }
 
-//func (s *Service) SetServiceProvider(p ServiceProvider) {
-//	s.Provider = p
-//}
-
-//	func (s *Service) NewClient(targetService string, opts ...client.Option) *client.Client {
-//		// merge options passed in service. take opts argument as priority
-//		//opts = append(s.ServiceOptions.ClientOptions, opts...)
-//		return client.NewClient(s.Name, opts...)
-//	}
-//
 // todo: move transort / reg to be set on service and re-used
 func (s *Service) Client(selector string, opts ...client.Option) *client.Client {
 	//opts = append(s.Srv.Options.s, opts...)
@@ -166,10 +130,6 @@ func (s *Service) Client(selector string, opts ...client.Option) *client.Client 
 func (s *Service) Server() *grpc.Server {
 	return s.Srv.Server()
 }
-
-//func (s *Service) GetConfig() config.Config {
-//	return s.Config
-//}
 
 func (c *Closer) Append(closer func()) {
 	c.closers = append(c.closers, closer)
@@ -245,7 +205,6 @@ func BuildServerOptions(serviceName, tr, reg string) ([]server.Option, error) {
 
 	so = append(so,
 		server.WithRegistry(registry),
-		//server.WithPort(c.Int("port")),
 		server.WithTransport(transport),
 		server.ServiceName(serviceName),
 	)
@@ -254,6 +213,12 @@ func BuildServerOptions(serviceName, tr, reg string) ([]server.Option, error) {
 	var ssi []grpc.StreamServerInterceptor
 	var usi []grpc.UnaryServerInterceptor
 
+	// TODO: MOVE port selection to cli
+	sp, _ := strconv.Atoi(os.Getenv("SERVER_PORT"))
+	if sp != 0 {
+		so = append(so, server.WithPort(sp))
+	}
+	//c.Int(os.Getenv("SERVER_PORT"))
 	so = append(so,
 		server.UnaryInterceptor(usi...),
 		server.StreamInterceptor(ssi...),
