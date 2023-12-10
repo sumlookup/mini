@@ -77,7 +77,6 @@ func (s *staticSelector) isLocalhost(service string) bool {
 
 // simple function for custom layer
 func (s *staticSelector) processSuffix(service string) (string, string) {
-	fmt.Printf("processSuffix @@ - svc - %v \n", service)
 	layer := s.addressSuffix
 
 	// allow the service name to be used as a namespace identifier
